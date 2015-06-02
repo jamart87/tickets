@@ -153,25 +153,35 @@ var app = {
                             cliente = row['cliente_id'];
                         }
                        
-
-                       if (estado == 0) {
-                           if (app.checkConectionState()) {
-                           app.updateInvitacionWS(qr,function(result){
-                                     app.showLoading("hide");
-                                     if (result) {
-                                        app.showAlert("Invitación Escaneada Exitosamente", "KLIKTICKET");
-                                     }
-                                     //app.addBoletoScan(numero, boleto, mesa, posicion);
-                           }); 
-                           } else {
-                                database.updateInvitacionEstado([ 1, cliente, evento_id], function(isOk) {
-                                    app.getInvitacionesDB(evento_id);
-                                });
-                           }
-                       } else {
-                                app.showLoading("hide");  
-                                app.showAlert("Invitación ya escaneada!", "KLIKTICKET");
+                       var st = 0;
+                       switch (estado) {
+                          case 0:
+                            var st = 1;
+                          break;
+                          case 1:
+                            var st = 2;
+                          break;
+                          case 2:
+                            var st = 3;
+                          break;
+                          case 3:
+                            var st = 2;
+                          break;
                        }
+
+                       if (app.checkConectionState()) {
+                       app.updateInvitacionWS( st, qr,function(result){
+                                 app.showLoading("hide");
+                                 if (result) {
+                                    app.showAlert("Invitación Escaneada Exitosamente", "KLIKTICKET");
+                                 }
+                       }); 
+                       } else {
+                            database.updateInvitacionEstado([ st , cliente, evento_id], function(isOk) {
+                                app.getInvitacionesDB(evento_id);
+                            });
+                       }
+                       
                     } else {
                          app.showLoading("hide");  
                          app.showAlert("Esta Invitación no pertenece a este evento!", "KLIKTICKET");
@@ -182,7 +192,7 @@ var app = {
     /*********
     ACTUALIZA EL ESTADO DE LA INVITACION SI EL EVENTO ES PRIVADO
     **********/
-    updateInvitacionWS: function(qr, callback) {
+    updateInvitacionWS: function(estado, qr, callback) {
         app.showLoading("show");
 
         var conexion_type = window.localStorage.getItem('conexion_type');
@@ -197,11 +207,11 @@ var app = {
             type: 'post',
             url: webServices.updateInvitacionQr,
             dataType: 'json',
-            data: {"user": app.encrypt( app.getUserData("user") ), "token": app.encrypt( app.getUserData("token") ), "qr": qr, "evento": evento_id },
+            data: {"user": app.encrypt( app.getUserData("user") ), "token": app.encrypt( app.getUserData("token") ), "qr": qr, "evento": evento_id, "estado": estado },
             async: false,
             success: function (r) {
                    if(r.response) {
-                        database.updateInvitacionEstado([ 1, r.cliente, evento_id], function(isOk) {
+                        database.updateInvitacionEstado([ estado, r.cliente, evento_id], function(isOk) {
                                 app.getInvitacionesDB(evento_id);
                         });
                         callback(true);
