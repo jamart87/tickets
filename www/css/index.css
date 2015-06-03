@@ -39,7 +39,7 @@ body {
 
 
 .ui-li-aside {
-    top: 0.7em !important;
+    top: 0.9em !important;
     right: 2.5em !important;
     margin-right: 35px !important;
 }
@@ -71,7 +71,15 @@ text-align: center;
   font-weight: bold;
 }
 
+.afuera {
+  color: red;
+  font-weight: bold;
+}
 
+.reingreso {
+  color: blue;
+  font-weight: bold;
+}
 
 
 

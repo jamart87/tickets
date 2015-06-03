@@ -210,18 +210,22 @@ var app = {
             data: {"user": app.encrypt( app.getUserData("user") ), "token": app.encrypt( app.getUserData("token") ), "qr": qr, "evento": evento_id, "estado": estado },
             async: false,
             success: function (r) {
-                   if(r.response) {
+                   if(r.response && r.cliente > 0) {
                         database.updateInvitacionEstado([ estado, r.cliente, evento_id], function(isOk) {
                                 app.getInvitacionesDB(evento_id);
                         });
                         callback(true);
+                        app.showLoading("hide");
+                   } else {
+                        callback(true);
+                        app.showLoading("hide");
                    }
-                   app.showLoading("hide");
+                   
             },
             error: function() {
                    callback(false);
                    app.showLoading("hide");
-                   app.showAlert("Invitacion No encontrada", "KLIKTICKET");
+                   app.showAlert("Problema de conexión", "KLIKTICKET");
             }
         });
         
@@ -986,13 +990,13 @@ var app = {
                         var numero = row['numero'];
                         var img = "";
                         if (row['estado'] == 0)
-                            img = "<p id='boleto-"+ row["boleto_id"]  +"' class='ui-li-aside'>No escaneado</p>";
+                            img = "<p id='boleto-"+ row["boleto_id"]  +"' class='ui-li-aside'>VALIDO</p>";
                         else if (row['estado'] == 1) 
-                             img = "<p id='boleto-"+ row["boleto_id"]  +"' class='ui-li-aside escaneado'>Escaneado</p>";
+                             img = "<p id='boleto-"+ row["boleto_id"]  +"' class='ui-li-aside escaneado'>YA VALIDADO</p>";
                         else if (row['estado'] == 2) 
-                             img = "<p id='boleto-"+ row["boleto_id"]  +"' class='ui-li-aside escaneado'>Afuera</p>";
+                             img = "<p id='boleto-"+ row["boleto_id"]  +"' class='ui-li-aside afuera'>AFUERA</p>";
                         else if (row['estado'] == 3) 
-                             img = "<p id='boleto-"+ row["boleto_id"]  +"' class='ui-li-aside escaneado'>Reingreso</p>";
+                             img = "<p id='boleto-"+ row["boleto_id"]  +"' class='ui-li-aside reingreso'>REINGRESO</p>";
                         
                          var m = "";
                          if (row["mesa_numero"] == null)
@@ -1051,9 +1055,25 @@ var app = {
                     
                     for (var i = 0; i < len; i++) {
                         var row= results.rows.item(i);
+                         
+                        var estado = row["estado"]; 
+
+                        switch (estado) {
+                          case 0:
+                            img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside escaneado'>VALIDO</p>";
+                          break;
+                          case 1:
+                            img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside escaneado'>YA VALIDADO</p>";
+                          break;
+                          case 2:
+                            img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside afuera'>AFUERA</p>";
+                          break;
+                          case 3:
+                            img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside reingreso'>REINGRESO</p>";
+                          break;
+                       }
                         
-                        img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside escaneado'>Escaneada</p>";
-                    
+                       
                         var htmlData = '';
                         htmlData += '<li>';
                             htmlData += '<a href="#">';
@@ -1241,7 +1261,7 @@ var app = {
                 if (results !== null) {
                     
                     var len = results.rows.length;
-                    boletos.push( [ 0, 0 ] );
+                    
                     for (var i = 0; i < len; i++) {
                         var row= results.rows.item(i);
                         
@@ -1262,7 +1282,7 @@ var app = {
                         }
 
                         database.selectInvitacionesAll(function(results2) {
-                            inv.push( 0 );
+                            
                             if (results2 !== null) {
                                 
                                 var len = results2.rows.length;
@@ -1270,14 +1290,21 @@ var app = {
                                 for (var i = 0; i < len; i++) {
                                     var row= results2.rows.item(i);
                                     
-                                    if (row['estado'] == 1 )
-                                        inv.push( row['invitacion_id'] );
+                                    if (row['estado'] == 1 || row['estado'] == 2 || row['estado'] == 3 )
+                                        inv.push( [ row['invitacion_id'], row['estado'] ] );
                                 }
                             }
 
 
                             if (boletos.length > 0 || log.length > 0 || inv.length > 0) {
-                        
+                            
+                            if (boletos.length == 0)
+                               boletos.push( [ 0, 0 ] );
+
+                            if (inv.length == 0)
+                               inv.push( [ 0, 0 ] );
+
+                                     
                             $.ajax({
                             type: 'post',
                             url: webServices.cargarBoletos,

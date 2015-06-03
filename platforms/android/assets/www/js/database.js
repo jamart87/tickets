@@ -245,7 +245,7 @@ var database = {
 	selectInvitaciones: function(params, callback) {
 		db.transaction(
 			function(tx) {
-				tx.executeSql("SELECT * FROM INVITACION WHERE evento_id = ? AND estado = 1 ORDER BY nombres", params, function(tx, results) {
+				tx.executeSql("SELECT * FROM INVITACION WHERE evento_id = ? AND estado IN (1,2,3) ORDER BY nombres", params, function(tx, results) {
 					callback(results);
 				});
 			},
