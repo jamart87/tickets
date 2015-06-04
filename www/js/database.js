@@ -38,7 +38,7 @@ var database = {
     	tx.executeSql('CREATE TABLE IF NOT EXISTS BOLETO (boleto_id INTEGER PRIMARY KEY, numero TEXT, qr TEXT, estado INTEGER, evento_id INT, localidad_id INTEGER, mesa_id INTEGER, mesa_capacidad INTEGER, mesa_disponibles INTEGER,  mesa_numero INTEGER, posicion INTEGER )');
         
         tx.executeSql('DROP TABLE IF EXISTS INVITACION');
-    	tx.executeSql('CREATE TABLE IF NOT EXISTS INVITACION (invitacion_id INTEGER PRIMARY KEY, cliente_id INTEGER, evento_id INTEGER, qr TEXT, estado INTEGER, nombres TEXT, apellidos TEXT)');
+    	tx.executeSql('CREATE TABLE IF NOT EXISTS INVITACION (invitacion_id INTEGER PRIMARY KEY, cliente_id INTEGER, evento_id INTEGER, qr TEXT, estado INTEGER, nombres TEXT, apellidos TEXT, vip INTEGER)');
 
     	tx.executeSql('DROP TABLE IF EXISTS LOCALIDAD');
         tx.executeSql('CREATE TABLE IF NOT EXISTS LOCALIDAD (localidad_id INTEGER PRIMARY KEY, nombre TEXT, descripcion TEXT, filas INTEGER, columnas INTEGER, capacidad INTEGER, mesas INTEGER, precio REAL, existencia INTEGER, estado INTEGER, evento_id INTEGER )');
@@ -61,7 +61,7 @@ var database = {
         tx.executeSql('CREATE TABLE IF NOT EXISTS LOCALIDAD (localidad_id INTEGER PRIMARY KEY, nombre TEXT, descripcion TEXT, filas INTEGER, columnas INTEGER, capacidad INTEGER, mesas INTEGER, precio REAL, existencia INTEGER, estado INTEGER, evento_id INTEGER )');
         
         tx.executeSql('DROP TABLE IF EXISTS INVITACION');
-    	tx.executeSql('CREATE TABLE IF NOT EXISTS INVITACION (invitacion_id INTEGER PRIMARY KEY, cliente_id INTEGER, evento_id INTEGER, qr TEXT, estado INTEGER, nombres TEXT, apellidos TEXT)');
+    	tx.executeSql('CREATE TABLE IF NOT EXISTS INVITACION (invitacion_id INTEGER PRIMARY KEY, cliente_id INTEGER, evento_id INTEGER, qr TEXT, estado INTEGER, nombres TEXT, apellidos TEXT, vip INTEGER)');
     
      	// CREATE MODE
     	tx.executeSql('CREATE TABLE IF NOT EXISTS MODE ( mode_id INTEGER PRIMARY KEY, status INTEGER)');
@@ -359,7 +359,7 @@ var database = {
     {
 		db.transaction(
 			function(tx) {
-				tx.executeSql("INSERT INTO INVITACION (invitacion_id, cliente_id, evento_id, qr, estado, nombres, apellidos) values (?,?,?,?,?,?,?)", params);
+				tx.executeSql("INSERT INTO INVITACION (invitacion_id, cliente_id, evento_id, qr, estado, nombres, apellidos, vip) values (?,?,?,?,?,?,?,?)", params);
 			},
 			function(error) {
 				console.log("Error processing Boleto: "+error.message);

@@ -69,49 +69,47 @@ var app = {
                             estado = row['estado'];
                             boleto = row['boleto_id'];
                             numero = row['numero'];
-                            mesa = row['mesa_numero'];
+                            mesa     = row['mesa_numero'];
                             posicion = row['posicion'];
-                            
-                            ev = row['evento_id'];
                         }
 
                         if (estado == "0") {
                             database.updateBoletoEstado([ 1, boleto], function(isOk) {
                                         if (app.checkConectionState()) {
                                         app.updateBoletoWS( 1, boleto,function(){
-                                             app.showAlert("Boleto Escaneado Exitosamente", "KLIKTICKET");
+                                             app.showAlert("Entrada Valida", "KLIKTICKET");
                                              app.addBoletoScan(numero, boleto, mesa, posicion, 1);
                                         }); } else {
-                                            app.showAlert("Boleto Escaneado Exitosamente", "KLIKTICKET");
+                                            app.showAlert("Entrada Valida", "KLIKTICKET");
                                             app.addBoletoScan(numero, boleto, mesa, posicion, 1);
                                         }
                                        
                             });     
-                        } else if (estado == "1" || estado == "3") {
+	                    } else if ( estado == "1" || estado == "3" ) {
                               
                               database.updateBoletoEstado([ 2, boleto], function(isOk) {
                                         if (app.checkConectionState()) {
                                         app.updateBoletoWS( 2, boleto,function(){
-                                             app.showAlert("Boleto Escaneado Exitosamente", "KLIKTICKET");
-                                             app.changeBoletoStatusScan(boleto, "Afuera");
+                                             app.showAlert("ENTRE", "KLIKTICKET");
+                                             app.changeBoletoStatusScan(boleto, "ADENTRO DE VIP");
                                         }); } else {
-                                            app.showAlert("Boleto Escaneado Exitosamente", "KLIKTICKET");
-                                            app.changeBoletoStatusScan(boleto, "Afuera");
+                                            app.showAlert("ENTRE", "KLIKTICKET");
+                                            app.changeBoletoStatusScan(boleto, "ADENTRO DE VIP");
                                         }
                                        
                               });  
 
 
-                        } else if (estado == "2") {
+                        } else if ( estado == "2" ) {
                               
                               database.updateBoletoEstado([ 3, boleto], function(isOk) {
                                         if (app.checkConectionState()) {
                                         app.updateBoletoWS( 3, boleto,function(){
-                                             app.showAlert("Boleto Escaneado Exitosamente", "KLIKTICKET");
-                                             app.changeBoletoStatusScan(boleto, "Reingreso");
+                                             app.showAlert("SALGA", "KLIKTICKET");
+                                             app.changeBoletoStatusScan(boleto, "AFUERA DE VIP");
                                         }); } else {
-                                            app.showAlert("Boleto Escaneado Exitosamente", "KLIKTICKET");
-                                            app.changeBoletoStatusScan(boleto, "Reingreso");
+                                            app.showAlert("SALGA", "KLIKTICKET");
+                                            app.changeBoletoStatusScan(boleto, "AFUERA DE VIP");
                                         }
                                        
                               });  
@@ -119,16 +117,16 @@ var app = {
                         
                     }
                     else {
-                        console.log("Boleto no encontrado");
+                        console.log("ENTRADA INVALIDA");
                         navigator.notification.vibrate(1000);
                         if (app.checkConectionState()) {
-                                  app.insertLogWS("Boleto no encontrado Qr:"+qr);
+                                  app.insertLogWS("ENTRADA INVALIDA Qr:"+qr);
                         } else { 
-                            database.insertLog([app.getUserData("user"), "Boleto no encontrado qr: "+qr, app.getNowDate() ],function(){
+                            database.insertLog([app.getUserData("user"), "ENTRADA INVALIDA qr: "+qr, app.getNowDate() ],function(){
                                 console.log("log inserted");
                             }); 
                         }
-                        app.showAlert("Boleto no encontrado", "KLIKTICKET");
+                        app.showAlert("ENTRADA INVALIDA", "KLIKTICKET");
                     }
         });
     },
@@ -141,51 +139,65 @@ var app = {
                  app.showLoading("show");
 
                  database.selectInvitacionByQr([qr, evento_id],function(results) {      
-                       
+                       app.showLoading("show");
                        if (results !== null && results.rows.length != 0) {
                         var len = results.rows.length;
                         var estado = "";
                         var cliente = "";
+                        var vip = "";
                        
                         for (var i = 0; i < len; i++) {
                             var row= results.rows.item(i);
                             estado = row['estado'];
                             cliente = row['cliente_id'];
+                            vip = row['vip'];
                         }
                        
                        var st = 0;
+                       var alertMsg = "";
                        switch (estado) {
                           case 0:
-                            var st = 1;
+                            st = 1;
+                            alertMsg = "ENTRADA VALIDA";
                           break;
                           case 1:
-                            var st = 2;
+                            st = 2;
+                            alertMsg = "ADENTRO";
                           break;
                           case 2:
-                            var st = 3;
+                            st = 3;
+                            alertMsg = "AFUERA";
                           break;
                           case 3:
-                            var st = 2;
+                            st = 2;
+                            alertMsg = "ADENTRO";
                           break;
                        }
-
-                       if (app.checkConectionState()) {
-                       app.updateInvitacionWS( st, qr,function(result){
-                                 app.showLoading("hide");
-                                 if (result) {
-                                    app.showAlert("Invitación Escaneada Exitosamente", "KLIKTICKET");
-                                 }
-                       }); 
-                       } else {
-                            database.updateInvitacionEstado([ st , cliente, evento_id], function(isOk) {
-                                app.getInvitacionesDB(evento_id);
-                            });
-                       }
+                        
+                       if ( vip == "1" || estado == "0") { 
+	                       if (app.checkConectionState()) {
+	                       app.updateInvitacionWS( st, qr,function(result){
+	                                 app.showLoading("hide");
+	                                 if (result) {
+	                                    app.showAlert( alertMsg, "KLIKTICKET");
+	                                 }
+	                       }); 
+	                       } else {
+	                            database.updateInvitacionEstado([ st , cliente, evento_id], function(isOk) {
+	                                app.showAlert( alertMsg , "KLIKTICKET");
+	                                app.getInvitacionesDB(evento_id);
+	                            });
+	                       }
+                   	   } else if (vip == "0" && estado >= 1){
+                   		 app.showLoading("hide");
+                   		 app.showAlert("ENTRADA INVALIDA", "KLIKTICKET");
+                   	   }
                        
                     } else {
                          app.showLoading("hide");  
-                         app.showAlert("Esta Invitación no pertenece a este evento!", "KLIKTICKET");
+                         app.showAlert("ENTRADA INVALIDA", "KLIKTICKET");
                     }
+                   
                 });
     },
 
@@ -762,7 +774,7 @@ var app = {
                         database.selectInvitacion([ob.invitacion_id], function(results) {
                             if (results !== null) {
                                 if (results.rows.length == 0) {
-                                   database.insertInvitacion([ob.invitacion_id, ob.cliente_cliente_id, ob.evento_evento_id ,ob.qr , ob.estado, ob.nombres, ob.apellidos], function(isOk) {
+                                   database.insertInvitacion([ob.invitacion_id, ob.cliente_cliente_id, ob.evento_evento_id ,ob.qr , ob.estado, ob.nombres, ob.apellidos, ob.vip], function(isOk) {
                                         console.log("invitacion insertada "+ob.invitacion_id+" evento:"+ ob.evento_evento_id);
                                         count++;
                                         if(count == target) {
@@ -1066,10 +1078,10 @@ var app = {
                             img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside escaneado'>YA VALIDADO</p>";
                           break;
                           case 2:
-                            img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside afuera'>AFUERA</p>";
+                            img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside reingreso'>ADENTRO VIP</p>";
                           break;
                           case 3:
-                            img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside reingreso'>REINGRESO</p>";
+                            img = "<p id='invitacion-"+ row["invitacion_id"]  +"' class='ui-li-aside afuera'>AFUERA VIP</p>";
                           break;
                        }
                         
@@ -1079,6 +1091,8 @@ var app = {
                             htmlData += '<a href="#">';
                             htmlData += '<h2 class="ui-li-heading"><strong> Invitacion No: </strong>'+ row["invitacion_id"] +'</h2>'+img;
                             htmlData += '<p class="ui-li-desc"> <strong> Nombre: </strong>'+ row["nombres"] +' '+row["apellidos"]+'</p>';
+                            if (row['vip'] == "1")
+                            	 htmlData += '<h2 class="ui-li-heading">VIP</h2>';
                             htmlData += '</a>';
                         htmlData += '</li>';
                         InvContainer.append(htmlData);                                              
