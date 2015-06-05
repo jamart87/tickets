@@ -1,0 +1,2 @@
+[ate: Thu, 05 Mar 2015 10:41:46 -0600] [type: sql] [action: create_table ][pid: 11172] [client: localhost:80] [user: 0] [ip: 127.0.0.1] [useragent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36] [message: init log table]
+[ate: Thu, 05 Mar 2015 10:41:52 -0600] [type: admin] [action: login ][pid: 25914] [client: localhost:80] [user: 1] [ip: 127.0.0.1] [useragent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36] [message: Inicio de sesión correcto]
