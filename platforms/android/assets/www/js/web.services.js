@@ -1,4 +1,4 @@
-var urlServer = "http://websiteguatemala.com/tpp/tickets/web/";
+var urlServer = "http://kliktickets.com/admin2/web/";
 var webServices = {
     "login": urlServer,
     "logout": urlServer+"index.php/logout",
